@@ -129,6 +129,9 @@ class Controller(object):
     @retry_login
     def _read(self, url, params=None):
         # Try block to handle the unifi server being offline.
+        if self.csrf_token:
+            self.session.headers.update({'Authorization': 'Bearer ' + self.csrf_token })
+
         r = self.session.get(url, params=params)
         return self._jsondec(r.text)
 
@@ -137,6 +140,10 @@ class Controller(object):
 
     @retry_login
     def _write(self, url, params=None):
+
+        if self.csrf_token:
+            self.session.headers.update({'Authorization': 'Bearer ' + self.csrf_token })
+
         r = self.session.post(url, json=params)
         return self._jsondec(r.text)
 
@@ -161,6 +168,10 @@ class Controller(object):
         r = self.session.post(login_url, json=params)
         if r.status_code != 200:
             raise APIError("Login failed - status code: %i" % r.status_code)
+
+        """Get bearer token if exists"""
+        if r.cookies['csrf_token']:
+            self.csrf_token = r.cookies['csrf_token']
 
     def _logout(self):
         log.debug('logout()')

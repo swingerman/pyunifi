@@ -170,6 +170,7 @@ class Controller(object):
             raise APIError("Login failed - status code: %i" % r.status_code)
 
         """Get bearer token if exists"""
+        print(r.cookies)
         if 'csrf_token' in r.cookies:
             self.csrf_token = r.cookies['csrf_token']
 
